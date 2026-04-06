@@ -1,19 +1,18 @@
-using System.Collections.Concurrent;
+using Microsoft.EntityFrameworkCore;
+using WebTestApp.Data;
 using WebTestApp.Models;
 
 namespace WebTestApp.Services;
 
-public class ArticleService : IArticleService
+public class ArticleService(AppDbContext db) : IArticleService
 {
-    private readonly ConcurrentDictionary<Guid, Article> _store = new();
+    public async Task<IReadOnlyList<Article>> GetAllAsync() =>
+        await db.Articles.OrderBy(a => a.Code).ToListAsync();
 
-    public IReadOnlyList<Article> GetAll() =>
-        _store.Values.OrderBy(a => a.Code).ToList();
+    public async Task<Article?> GetByIdAsync(Guid id) =>
+        await db.Articles.FindAsync(id);
 
-    public Article? GetById(Guid id) =>
-        _store.TryGetValue(id, out var article) ? article : null;
-
-    public Article Create(ArticleRequest request)
+    public async Task<Article> CreateAsync(ArticleRequest request)
     {
         var article = new Article
         {
@@ -21,20 +20,29 @@ public class ArticleService : IArticleService
             Description = request.Description,
             ProductCode = request.ProductCode
         };
-        _store[article.Id] = article;
+        db.Articles.Add(article);
+        await db.SaveChangesAsync();
         return article;
     }
 
-    public Article? Update(Guid id, ArticleRequest request)
+    public async Task<Article?> UpdateAsync(Guid id, ArticleRequest request)
     {
-        if (!_store.TryGetValue(id, out var article))
-            return null;
+        var article = await db.Articles.FindAsync(id);
+        if (article is null) return null;
 
         article.Code        = request.Code;
         article.Description = request.Description;
         article.ProductCode = request.ProductCode;
+        await db.SaveChangesAsync();
         return article;
     }
 
-    public bool Delete(Guid id) => _store.TryRemove(id, out _);
+    public async Task<bool> DeleteAsync(Guid id)
+    {
+        var article = await db.Articles.FindAsync(id);
+        if (article is null) return false;
+        db.Articles.Remove(article);
+        await db.SaveChangesAsync();
+        return true;
+    }
 }

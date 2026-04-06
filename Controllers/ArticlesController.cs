@@ -8,52 +8,39 @@ namespace WebTestApp.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ArticlesController : ControllerBase
+public class ArticlesController(IArticleService articles) : ControllerBase
 {
-    private readonly IArticleService _articles;
-
-    public ArticlesController(IArticleService articles) => _articles = articles;
-
     [HttpGet]
-    public IActionResult GetAll() => Ok(_articles.GetAll());
+    public async Task<IActionResult> GetAll() => Ok(await articles.GetAllAsync());
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(Article), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetById(Guid id)
+    public async Task<IActionResult> GetById(Guid id)
     {
-        var article = _articles.GetById(id);
+        var article = await articles.GetByIdAsync(id);
         return article is null ? NotFound() : Ok(article);
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(Article), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public IActionResult Create([FromBody] ArticleRequest request)
+    public async Task<IActionResult> Create([FromBody] ArticleRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Code))
             return BadRequest("Code is required.");
 
-        var article = _articles.Create(request);
+        var article = await articles.CreateAsync(request);
         return CreatedAtAction(nameof(GetById), new { id = article.Id }, article);
     }
 
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(typeof(Article), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public IActionResult Update(Guid id, [FromBody] ArticleRequest request)
+    public async Task<IActionResult> Update(Guid id, [FromBody] ArticleRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Code))
             return BadRequest("Code is required.");
 
-        var article = _articles.Update(id, request);
+        var article = await articles.UpdateAsync(id, request);
         return article is null ? NotFound() : Ok(article);
     }
 
     [HttpDelete("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult Delete(Guid id) =>
-        _articles.Delete(id) ? NoContent() : NotFound();
+    public async Task<IActionResult> Delete(Guid id) =>
+        await articles.DeleteAsync(id) ? NoContent() : NotFound();
 }

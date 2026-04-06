@@ -8,16 +8,25 @@ ASP.NET Core Web API (.NET 8) with JWT authentication and a single-page HTML fro
 - **Auth:** JWT Bearer tokens via `Microsoft.AspNetCore.Authentication.JwtBearer`
 - **API docs:** Swagger/OpenAPI via `Swashbuckle.AspNetCore`
 - **Frontend:** Vanilla HTML + CSS + JavaScript (no framework, no build step)
-- **Storage:** In-memory (`ConcurrentDictionary`) — data resets on app restart
+- **Database:** PostgreSQL via Entity Framework Core 8 + Npgsql provider
+- **ORM:** EF Core with code-first migrations (migrations auto-applied on startup)
 
 ## Running the App
 ```bash
 cd "f:\SynologyDrive\My Documents\Work\AI\WebTestApp"
 dotnet run
 ```
-Then open `http://localhost:5000`.
+Then open `http://localhost:5000`. Migrations are applied automatically on startup.
 
 > **Note:** A `NuGet.config` was added to force `nuget.org` as the sole package source, bypassing the corporate Azure DevOps feed that requires authentication.
+
+## Database
+- **Engine:** PostgreSQL (local, `localhost:5432`)
+- **Database name:** `WebTestApp`
+- **Connection string:** stored in `appsettings.Development.json` (git-ignored)
+- `appsettings.json` contains a placeholder password (`CHANGE_ME`) — safe to commit
+- Run migrations manually: `dotnet ef migrations add <Name>` then `dotnet ef database update`
+- Tables: `Companies`, `Articles`, `CompanyArticle` (many-to-many join)
 
 ## Demo Credentials
 | Username | Password  | Role  |
@@ -38,22 +47,25 @@ WebTestApp/
 ├── Program.cs                         ← DI, middleware pipeline, Swagger
 ├── Controllers/
 │   ├── AuthController.cs              ← POST /api/auth/login (public)
-│   ├── ArticlesController.cs          ← CRUD /api/articles (protected)
-│   ├── CompaniesController.cs         ← CRUD /api/companies + article sub-resources (protected)
+│   ├── ArticlesController.cs          ← CRUD /api/articles (protected, async)
+│   ├── CompaniesController.cs         ← CRUD /api/companies + article sub-resources (protected, async)
 │   └── WeatherForecastController.cs   ← GET /api/weatherforecast (protected)
+├── Data/
+│   └── AppDbContext.cs                ← EF Core DbContext (Companies, Articles, CompanyArticle)
+├── Migrations/                        ← EF Core generated migrations
 ├── Models/
-│   ├── Article.cs                     ← Article class + ArticleRequest record
-│   ├── Company.cs                     ← Company class (with ArticleIds) + CompanyRequest record
+│   ├── Article.cs                     ← Article entity + ArticleRequest DTO
+│   ├── Company.cs                     ← Company entity + CompanyRequest + CompanyResponse DTOs
 │   ├── LoginRequest.cs
 │   ├── LoginResponse.cs
 │   └── WeatherForecast.cs
 ├── Services/
 │   ├── IArticleService.cs
-│   ├── ArticleService.cs              ← in-memory ConcurrentDictionary, Singleton
+│   ├── ArticleService.cs              ← EF Core async, Scoped
 │   ├── IAuthService.cs
-│   ├── AuthService.cs                 ← validates credentials, mints JWT
+│   ├── AuthService.cs                 ← validates credentials, mints JWT (Scoped)
 │   ├── ICompanyService.cs
-│   └── CompanyService.cs              ← in-memory ConcurrentDictionary, Singleton
+│   └── CompanyService.cs              ← EF Core async, Scoped
 └── wwwroot/
     └── index.html                     ← SPA: login, sidebar nav, companies + articles CRUD
 ```
@@ -122,6 +134,19 @@ Single self-contained HTML file — no build step, no npm, no framework.
   - Git identity for this repo: Constantin Bosca &lt;costiboshca@yahoo.com&gt;
   - `gh` CLI not available; repo created via GitHub REST API, pushed over HTTPS
   - Token removed from remote URL after push (stored clean as `https://github.com/costiboshca/WebTestApp.git`)
+
+### Session 5
+- Migrated data storage from in-memory to **PostgreSQL** via Entity Framework Core
+  - Added `Npgsql.EntityFrameworkCore.PostgreSQL` and `Microsoft.EntityFrameworkCore.Design` packages
+  - Created `Data/AppDbContext.cs` with EF many-to-many mapping (`CompanyArticle` join table)
+  - `Company.ArticleIds` (HashSet) replaced with `ICollection<Article> Articles` navigation property
+  - `Article` gained `ICollection<Company> Companies` navigation property
+  - Added `CompanyResponse` DTO to preserve the original `articleIds` JSON shape for the frontend
+  - All service methods converted to `async/await` (services changed from Singleton to Scoped)
+  - `Program.cs` registers `AppDbContext` and auto-applies migrations on startup
+  - `appsettings.json` stores a placeholder password; real credentials in `appsettings.Development.json` (git-ignored)
+  - Ran `dotnet ef migrations add InitialCreate` + `dotnet ef database update` — DB and all tables created
+  - `dotnet-ef` global tool installed (`dotnet tool install --global dotnet-ef`)
 
 ### Session 4
 - Added **Articles** entity (Code, Description, ProductCode) with full CRUD

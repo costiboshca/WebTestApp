@@ -4,9 +4,9 @@ namespace WebTestApp.Services;
 
 public interface IArticleService
 {
-    IReadOnlyList<Article> GetAll();
-    Article? GetById(Guid id);
-    Article Create(ArticleRequest request);
-    Article? Update(Guid id, ArticleRequest request);
-    bool Delete(Guid id);
+    Task<IReadOnlyList<Article>> GetAllAsync();
+    Task<Article?>               GetByIdAsync(Guid id);
+    Task<Article>                CreateAsync(ArticleRequest request);
+    Task<Article?>               UpdateAsync(Guid id, ArticleRequest request);
+    Task<bool>                   DeleteAsync(Guid id);
 }

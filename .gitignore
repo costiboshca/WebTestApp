@@ -13,4 +13,5 @@ packages/
 
 ## Secrets — never commit these
 appsettings.Production.json
+appsettings.Development.json
 secrets.json

@@ -4,13 +4,13 @@ namespace WebTestApp.Services;
 
 public interface ICompanyService
 {
-    IReadOnlyList<Company> GetAll();
-    Company? GetById(Guid id);
-    Company Create(CompanyRequest request);
-    Company? Update(Guid id, CompanyRequest request);
-    bool Delete(Guid id);
+    Task<IReadOnlyList<CompanyResponse>> GetAllAsync();
+    Task<CompanyResponse?>              GetByIdAsync(Guid id);
+    Task<CompanyResponse>               CreateAsync(CompanyRequest request);
+    Task<CompanyResponse?>              UpdateAsync(Guid id, CompanyRequest request);
+    Task<bool>                          DeleteAsync(Guid id);
 
-    bool AddArticle(Guid companyId, Guid articleId);
-    bool RemoveArticle(Guid companyId, Guid articleId);
-    IReadOnlySet<Guid>? GetArticleIds(Guid companyId);
+    Task<IReadOnlyList<Article>?>       GetArticlesAsync(Guid companyId);
+    Task<bool>                          AddArticleAsync(Guid companyId, Guid articleId);
+    Task<bool>                          RemoveArticleAsync(Guid companyId, Guid articleId);
 }

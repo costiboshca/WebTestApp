@@ -6,6 +6,8 @@ public class Article
     public string Code        { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string ProductCode { get; set; } = string.Empty;
+
+    public ICollection<Company> Companies { get; set; } = [];
 }
 
 public record ArticleRequest(string Code, string Description, string ProductCode);

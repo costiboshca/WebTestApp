@@ -1,7 +1,9 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using WebTestApp.Data;
 using WebTestApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,14 +11,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Controllers
 builder.Services.AddControllers();
 
-// Auth service
+// PostgreSQL / EF Core
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Services (Scoped — one per request, required when injecting DbContext)
 builder.Services.AddScoped<IAuthService, AuthService>();
-
-// Company service (singleton — keeps data for app lifetime)
-builder.Services.AddSingleton<ICompanyService, CompanyService>();
-
-// Article service (singleton — keeps data for app lifetime)
-builder.Services.AddSingleton<IArticleService, ArticleService>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<IArticleService, ArticleService>();
 
 // JWT Authentication
 var jwt = builder.Configuration.GetSection("JwtSettings");
@@ -73,6 +75,13 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+// Auto-apply migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
 {
