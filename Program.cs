@@ -1,9 +1,11 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using WebTestApp.Data;
+using WebTestApp.Models;
 using WebTestApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -76,11 +78,25 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Auto-apply migrations on startup
+// Auto-apply migrations and seed users on startup
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
+
+    if (!db.Users.Any())
+    {
+        var hasher = new PasswordHasher<User>();
+        var users  = new[]
+        {
+            new User { Username = "admin", Role = "Admin" },
+            new User { Username = "user",  Role = "User"  }
+        };
+        users[0].PasswordHash = hasher.HashPassword(users[0], "pwd123");
+        users[1].PasswordHash = hasher.HashPassword(users[1], "letmein");
+        db.Users.AddRange(users);
+        db.SaveChanges();
+    }
 }
 
 if (app.Environment.IsDevelopment())

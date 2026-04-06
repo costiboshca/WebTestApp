@@ -7,6 +7,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<Article> Articles  => Set<Article>();
+    public DbSet<User>    Users     => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,6 +31,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(a => a.Code).IsUnique();
             e.Property(a => a.Description).HasMaxLength(1000);
             e.Property(a => a.ProductCode).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<User>(e =>
+        {
+            e.HasKey(u => u.Id);
+            e.Property(u => u.Username).IsRequired().HasMaxLength(100);
+            e.HasIndex(u => u.Username).IsUnique();
+            e.Property(u => u.PasswordHash).IsRequired();
+            e.Property(u => u.Role).IsRequired().HasMaxLength(50);
         });
     }
 }

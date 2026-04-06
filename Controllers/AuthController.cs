@@ -6,18 +6,14 @@ namespace WebTestApp.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController : ControllerBase
+public class AuthController(IAuthService auth) : ControllerBase
 {
-    private readonly IAuthService _auth;
-
-    public AuthController(IAuthService auth) => _auth = auth;
-
     [HttpPost("login")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var result = _auth.Authenticate(request);
+        var result = await auth.AuthenticateAsync(request);
         return result is null ? Unauthorized("Invalid credentials.") : Ok(result);
     }
 }

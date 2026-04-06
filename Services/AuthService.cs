@@ -1,39 +1,38 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using WebTestApp.Data;
 using WebTestApp.Models;
 
 namespace WebTestApp.Services;
 
-public class AuthService : IAuthService
+public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
 {
-    private static readonly Dictionary<string, string> Users = new()
+    private readonly PasswordHasher<User> _hasher = new();
+
+    public async Task<LoginResponse?> AuthenticateAsync(LoginRequest request)
     {
-        { "admin", "password123" },
-        { "user",  "letmein"    }
-    };
+        var user = await db.Users
+            .FirstOrDefaultAsync(u => u.Username == request.Username);
 
-    private readonly IConfiguration _config;
+        if (user is null) return null;
 
-    public AuthService(IConfiguration config) => _config = config;
+        var result = _hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
+        if (result == PasswordVerificationResult.Failed) return null;
 
-    public LoginResponse? Authenticate(LoginRequest request)
-    {
-        if (!Users.TryGetValue(request.Username, out var storedPassword)
-            || storedPassword != request.Password)
-            return null;
-
-        var jwt    = _config.GetSection("JwtSettings");
+        var jwt    = config.GetSection("JwtSettings");
         var key    = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["SecretKey"]!));
         var creds  = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var expiry = DateTime.UtcNow.AddMinutes(double.Parse(jwt["ExpiryMinutes"]!));
 
         var claims = new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, request.Username),
-            new Claim(ClaimTypes.Name, request.Username),
-            new Claim(ClaimTypes.Role, request.Username == "admin" ? "Admin" : "User")
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name,           user.Username),
+            new Claim(ClaimTypes.Role,           user.Role)
         };
 
         var token = new JwtSecurityToken(

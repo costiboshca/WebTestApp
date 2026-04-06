@@ -4,5 +4,5 @@ namespace WebTestApp.Services;
 
 public interface IAuthService
 {
-    LoginResponse? Authenticate(LoginRequest request);
+    Task<LoginResponse?> AuthenticateAsync(LoginRequest request);
 }
