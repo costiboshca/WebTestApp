@@ -38,20 +38,24 @@ WebTestApp/
 ├── Program.cs                         ← DI, middleware pipeline, Swagger
 ├── Controllers/
 │   ├── AuthController.cs              ← POST /api/auth/login (public)
-│   ├── CompaniesController.cs         ← CRUD /api/companies (protected)
+│   ├── ArticlesController.cs          ← CRUD /api/articles (protected)
+│   ├── CompaniesController.cs         ← CRUD /api/companies + article sub-resources (protected)
 │   └── WeatherForecastController.cs   ← GET /api/weatherforecast (protected)
 ├── Models/
-│   ├── Company.cs                     ← Company class + CompanyRequest record
+│   ├── Article.cs                     ← Article class + ArticleRequest record
+│   ├── Company.cs                     ← Company class (with ArticleIds) + CompanyRequest record
 │   ├── LoginRequest.cs
 │   ├── LoginResponse.cs
 │   └── WeatherForecast.cs
 ├── Services/
+│   ├── IArticleService.cs
+│   ├── ArticleService.cs              ← in-memory ConcurrentDictionary, Singleton
 │   ├── IAuthService.cs
 │   ├── AuthService.cs                 ← validates credentials, mints JWT
 │   ├── ICompanyService.cs
 │   └── CompanyService.cs              ← in-memory ConcurrentDictionary, Singleton
 └── wwwroot/
-    └── index.html                     ← SPA: login, sidebar nav, companies CRUD
+    └── index.html                     ← SPA: login, sidebar nav, companies + articles CRUD
 ```
 
 ## API Endpoints
@@ -64,11 +68,22 @@ WebTestApp/
 | POST | `/api/companies` | JWT | Create company |
 | PUT | `/api/companies/{id}` | JWT | Update company |
 | DELETE | `/api/companies/{id}` | JWT | Delete company |
+| GET | `/api/companies/{id}/articles` | JWT | List articles linked to a company |
+| POST | `/api/companies/{id}/articles/{articleId}` | JWT | Link an article to a company |
+| DELETE | `/api/companies/{id}/articles/{articleId}` | JWT | Unlink an article from a company |
+| GET | `/api/articles` | JWT | List all articles (sorted by code) |
+| GET | `/api/articles/{id}` | JWT | Get single article |
+| POST | `/api/articles` | JWT | Create article |
+| PUT | `/api/articles/{id}` | JWT | Update article |
+| DELETE | `/api/articles/{id}` | JWT | Delete article |
 
 Swagger UI is available at `/swagger` in Development.
 
 ## Company Model
-Fields: `Id` (Guid, auto-generated), `Name` (required), `Description`, `Address`.
+Fields: `Id` (Guid, auto-generated), `Name` (required), `Description`, `Address`, `ArticleIds` (HashSet&lt;Guid&gt;).
+
+## Article Model
+Fields: `Id` (Guid, auto-generated), `Code` (required), `Description`, `ProductCode`.
 
 ## Frontend (wwwroot/index.html)
 Single self-contained HTML file — no build step, no npm, no framework.
@@ -97,3 +112,32 @@ Single self-contained HTML file — no build step, no npm, no framework.
   - Right-side navigation sidebar (Dashboard, Companies)
   - Companies page with sortable table, Add/Edit modal, delete confirmation modal, toast notifications
   - Keyboard shortcuts: Enter to login, Escape to close modals
+
+### Session 3
+- Created `CLAUDE.md` (this file) to track project history and context
+- Initialised Git repository and pushed to GitHub
+  - Remote: https://github.com/costiboshca/WebTestApp
+  - Branch: `main`
+  - Added `.gitignore` (excludes `bin/`, `obj/`, `.vs/`, secrets)
+  - Git identity for this repo: Constantin Bosca &lt;costiboshca@yahoo.com&gt;
+  - `gh` CLI not available; repo created via GitHub REST API, pushed over HTTPS
+  - Token removed from remote URL after push (stored clean as `https://github.com/costiboshca/WebTestApp.git`)
+
+### Session 4
+- Added **Articles** entity (Code, Description, ProductCode) with full CRUD
+  - `Models/Article.cs` — `Article` class + `ArticleRequest` DTO
+  - `Services/ArticleService.cs` — `ConcurrentDictionary`-backed singleton service
+  - `Controllers/ArticlesController.cs` — REST CRUD, all protected
+- Added **Company → Articles** association (many-to-many, in-memory)
+  - `Company.ArticleIds` (`HashSet<Guid>`) on the Company model
+  - `ICompanyService` extended with `AddArticle`, `RemoveArticle`, `GetArticleIds`
+  - `CompaniesController` extended with sub-resource endpoints:
+    - `GET  /api/companies/{id}/articles`
+    - `POST /api/companies/{id}/articles/{articleId}`
+    - `DELETE /api/companies/{id}/articles/{articleId}`
+- Updated `wwwroot/index.html`:
+  - Added **Articles** page (sidebar nav + CRUD table + Add/Edit/Delete modals)
+  - Companies table: "Articles" button per row showing linked count chip
+  - **Company Articles modal**: dropdown to link unlinked articles, list of linked articles with Remove button
+  - Shared confirm-delete modal now handles both companies and articles
+- Pushed all changes to GitHub

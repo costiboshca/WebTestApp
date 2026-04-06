@@ -15,6 +15,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 // Company service (singleton — keeps data for app lifetime)
 builder.Services.AddSingleton<ICompanyService, CompanyService>();
 
+// Article service (singleton — keeps data for app lifetime)
+builder.Services.AddSingleton<IArticleService, ArticleService>();
+
 // JWT Authentication
 var jwt = builder.Configuration.GetSection("JwtSettings");
 var key = Encoding.UTF8.GetBytes(jwt["SecretKey"]!);

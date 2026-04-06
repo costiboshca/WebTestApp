@@ -9,4 +9,8 @@ public interface ICompanyService
     Company Create(CompanyRequest request);
     Company? Update(Guid id, CompanyRequest request);
     bool Delete(Guid id);
+
+    bool AddArticle(Guid companyId, Guid articleId);
+    bool RemoveArticle(Guid companyId, Guid articleId);
+    IReadOnlySet<Guid>? GetArticleIds(Guid companyId);
 }

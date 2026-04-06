@@ -36,8 +36,8 @@
 
     input[type="text"],
     input[type="password"],
-    input[type="email"],
-    textarea {
+    textarea,
+    select {
       width: 100%;
       padding: .6rem .75rem;
       border: 1px solid #ccc;
@@ -46,10 +46,10 @@
       margin-bottom: 1rem;
       transition: border-color .2s;
       font-family: inherit;
+      background: #fff;
     }
 
-    input:focus, textarea:focus { outline: none; border-color: #4361ee; }
-
+    input:focus, textarea:focus, select:focus { outline: none; border-color: #4361ee; }
     textarea { resize: vertical; min-height: 70px; }
 
     .btn {
@@ -62,15 +62,16 @@
     }
 
     .btn:disabled { opacity: .55; cursor: not-allowed; }
-    .btn-primary  { background: #4361ee; color: #fff; }
-    .btn-primary:hover:not(:disabled)  { background: #3451d1; }
-    .btn-success  { background: #06d6a0; color: #fff; }
-    .btn-success:hover:not(:disabled)  { background: #05b888; }
-    .btn-danger   { background: #e63946; color: #fff; }
-    .btn-danger:hover:not(:disabled)   { background: #c1121f; }
-    .btn-ghost    { background: transparent; color: #4361ee; border: 1px solid #4361ee; }
-    .btn-ghost:hover:not(:disabled)    { background: #eef0fd; }
-    .btn-full     { width: 100%; }
+    .btn-primary { background: #4361ee; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #3451d1; }
+    .btn-success { background: #06d6a0; color: #fff; }
+    .btn-success:hover:not(:disabled) { background: #05b888; }
+    .btn-danger  { background: #e63946; color: #fff; }
+    .btn-danger:hover:not(:disabled)  { background: #c1121f; }
+    .btn-ghost   { background: transparent; color: #4361ee; border: 1px solid #4361ee; }
+    .btn-ghost:hover:not(:disabled)   { background: #eef0fd; }
+    .btn-sm      { padding: .3rem .7rem; font-size: .8rem; }
+    .btn-full    { width: 100%; }
 
     .error { color: #e63946; font-size: .8125rem; margin-top: -.5rem; margin-bottom: .75rem; }
 
@@ -119,14 +120,12 @@
       cursor: pointer;
       transition: all .2s;
     }
-
     .btn-logout:hover { border-color: #e63946; color: #e63946; }
 
     /* ── Right sidebar ─────────────────────────────────── */
     .sidebar {
       position: fixed;
-      top: 56px;
-      right: 0;
+      top: 56px; right: 0;
       width: 200px;
       height: calc(100vh - 56px);
       background: #fff;
@@ -159,14 +158,7 @@
     }
 
     .nav-item:hover { background: #f7f8ff; color: #4361ee; }
-
-    .nav-item.active {
-      background: #eef0fd;
-      color: #4361ee;
-      border-right-color: #4361ee;
-      font-weight: 600;
-    }
-
+    .nav-item.active { background: #eef0fd; color: #4361ee; border-right-color: #4361ee; font-weight: 600; }
     .nav-icon { font-size: 1rem; width: 1.2rem; text-align: center; }
 
     /* ── Main content ──────────────────────────────────── */
@@ -200,7 +192,6 @@
     }
 
     table { width: 100%; border-collapse: collapse; }
-
     thead { background: #f7f8ff; }
 
     th {
@@ -225,13 +216,24 @@
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #fafbff; }
 
-    .td-actions { display: flex; gap: .5rem; }
+    .td-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
 
     .empty-row td {
       text-align: center;
       color: #a0aec0;
       padding: 2.5rem;
       font-size: .9375rem;
+    }
+
+    .count-chip {
+      display: inline-block;
+      background: #eef0fd;
+      color: #4361ee;
+      font-size: .75rem;
+      font-weight: 600;
+      padding: .1rem .5rem;
+      border-radius: 99px;
+      margin-left: .35rem;
     }
 
     /* ── Modal ─────────────────────────────────────────── */
@@ -256,6 +258,8 @@
       overflow-y: auto;
     }
 
+    .modal-lg { max-width: 640px; }
+
     .modal-header {
       display: flex;
       align-items: center;
@@ -275,7 +279,6 @@
       padding: .2rem .4rem;
       border-radius: 4px;
     }
-
     .modal-close:hover { background: #f0f2f5; color: #e63946; }
 
     .modal-footer {
@@ -284,6 +287,45 @@
       justify-content: flex-end;
       margin-top: 1rem;
     }
+
+    /* ── Company-Articles modal specific ───────────────── */
+    .ca-add-row {
+      display: flex;
+      gap: .5rem;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .ca-add-row select { margin-bottom: 0; flex: 1; }
+
+    .ca-linked-list {
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+      min-height: 60px;
+    }
+
+    .ca-linked-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .6rem .85rem;
+      border-bottom: 1px solid #f0f2f5;
+      font-size: .875rem;
+    }
+
+    .ca-linked-item:last-child { border-bottom: none; }
+    .ca-linked-item:hover { background: #fafbff; }
+
+    .ca-empty {
+      padding: 1rem;
+      text-align: center;
+      color: #a0aec0;
+      font-size: .875rem;
+    }
+
+    .ca-item-info strong { display: block; color: #2d3748; }
+    .ca-item-info span   { color: #718096; font-size: .8rem; }
 
     /* ── Confirm dialog ────────────────────────────────── */
     .confirm-msg { margin-bottom: 1.25rem; color: #4a5568; }
@@ -304,8 +346,7 @@
       pointer-events: none;
       z-index: 300;
     }
-
-    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.show    { opacity: 1; transform: translateX(-50%) translateY(0); }
     #toast.success { background: #06d6a0; }
     #toast.error   { background: #e63946; }
 
@@ -320,10 +361,8 @@
     <h1>Sign In</h1>
     <label for="username">Username</label>
     <input type="text" id="username" placeholder="admin or user" autocomplete="username" />
-
     <label for="password">Password</label>
     <input type="password" id="password" placeholder="password" autocomplete="current-password" />
-
     <button class="btn btn-primary btn-full" id="loginBtn" onclick="login()">Login</button>
     <div id="loginError" class="error" style="margin-top:.5rem"></div>
   </div>
@@ -352,12 +391,15 @@
     <div class="nav-item" onclick="showPage('companies')" id="nav-companies">
       <span class="nav-icon">&#127970;</span> Companies
     </div>
+    <div class="nav-item" onclick="showPage('articles')" id="nav-articles">
+      <span class="nav-icon">&#128196;</span> Articles
+    </div>
   </nav>
 
   <!-- Main content -->
   <div class="main">
 
-    <!-- Dashboard page -->
+    <!-- ── Dashboard ─────────────────────────────────── -->
     <div class="page active" id="page-dashboard">
       <div class="page-header">
         <div class="page-title">Dashboard</div>
@@ -370,7 +412,7 @@
       </div>
     </div>
 
-    <!-- Companies page -->
+    <!-- ── Companies ──────────────────────────────────── -->
     <div class="page" id="page-companies">
       <div class="page-header">
         <div class="page-title">Companies</div>
@@ -383,10 +425,33 @@
               <th>Name</th>
               <th>Description</th>
               <th>Address</th>
-              <th style="width:130px">Actions</th>
+              <th style="width:200px">Actions</th>
             </tr>
           </thead>
           <tbody id="companiesBody">
+            <tr class="empty-row"><td colspan="4">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Articles ───────────────────────────────────── -->
+    <div class="page" id="page-articles">
+      <div class="page-header">
+        <div class="page-title">Articles</div>
+        <button class="btn btn-success" onclick="openArticleModal()">+ Add Article</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Description</th>
+              <th>Product Code</th>
+              <th style="width:130px">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="articlesBody">
             <tr class="empty-row"><td colspan="4">Loading…</td></tr>
           </tbody>
         </table>
@@ -400,24 +465,70 @@
 <div class="modal-overlay" id="companyModal" hidden>
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title" id="modalTitle">Add Company</div>
+      <div class="modal-title" id="companyModalTitle">Add Company</div>
       <button class="modal-close" onclick="closeCompanyModal()">&#10005;</button>
     </div>
-
     <label for="cName">Name <span style="color:#e63946">*</span></label>
     <input type="text" id="cName" placeholder="Company name" />
-
     <label for="cDescription">Description</label>
     <textarea id="cDescription" placeholder="Short description"></textarea>
-
     <label for="cAddress">Address</label>
     <input type="text" id="cAddress" placeholder="Street, City, Country" />
-
-    <div id="modalError" class="error"></div>
-
+    <div id="companyModalError" class="error"></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeCompanyModal()">Cancel</button>
       <button class="btn btn-primary" id="saveCompanyBtn" onclick="saveCompany()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ ARTICLE MODAL ════════════════════ -->
+<div class="modal-overlay" id="articleModal" hidden>
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="articleModalTitle">Add Article</div>
+      <button class="modal-close" onclick="closeArticleModal()">&#10005;</button>
+    </div>
+    <label for="aCode">Code <span style="color:#e63946">*</span></label>
+    <input type="text" id="aCode" placeholder="e.g. ART-001" />
+    <label for="aDescription">Description</label>
+    <textarea id="aDescription" placeholder="Article description"></textarea>
+    <label for="aProductCode">Product Code</label>
+    <input type="text" id="aProductCode" placeholder="e.g. PRD-XYZ" />
+    <div id="articleModalError" class="error"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeArticleModal()">Cancel</button>
+      <button class="btn btn-primary" id="saveArticleBtn" onclick="saveArticle()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ COMPANY ARTICLES MODAL ════════════════════ -->
+<div class="modal-overlay" id="companyArticlesModal" hidden>
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title" id="caModalTitle">Articles</div>
+      <button class="modal-close" onclick="closeCompanyArticlesModal()">&#10005;</button>
+    </div>
+
+    <!-- Add article row -->
+    <label>Add article to company</label>
+    <div class="ca-add-row">
+      <select id="caArticleSelect">
+        <option value="">— select an article —</option>
+      </select>
+      <button class="btn btn-success" onclick="addArticleToCompany()">Add</button>
+    </div>
+    <div id="caAddError" class="error"></div>
+
+    <!-- Linked articles list -->
+    <label style="margin-bottom:.5rem;display:block">Linked articles</label>
+    <div class="ca-linked-list" id="caLinkedList">
+      <div class="ca-empty">No articles linked yet.</div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCompanyArticlesModal()">Close</button>
     </div>
   </div>
 </div>
@@ -426,7 +537,7 @@
 <div class="modal-overlay" id="confirmModal" hidden>
   <div class="modal" style="max-width:380px">
     <div class="modal-header">
-      <div class="modal-title">Delete Company</div>
+      <div class="modal-title" id="confirmTitle">Confirm Delete</div>
       <button class="modal-close" onclick="closeConfirm()">&#10005;</button>
     </div>
     <p class="confirm-msg" id="confirmMsg"></p>
@@ -443,8 +554,13 @@
 <script>
 // ── State ──────────────────────────────────────────────────────────────────
 let jwtToken        = null;
-let editingId       = null;   // null = new company, guid = editing
-let pendingDeleteId = null;
+let editingCompanyId = null;
+let editingArticleId = null;
+let pendingDeleteType = null;  // 'company' | 'article'
+let pendingDeleteId   = null;
+let caCompanyId       = null;  // company open in articles modal
+let caCompanyName     = '';
+let allArticles       = [];    // cache for article select options
 
 // ── Auth ───────────────────────────────────────────────────────────────────
 async function login() {
@@ -457,7 +573,6 @@ async function login() {
   if (!username || !password) { errorEl.textContent = 'Enter username and password.'; return; }
 
   btn.disabled = true; btn.textContent = 'Signing in…';
-
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
@@ -468,13 +583,10 @@ async function login() {
     if (res.ok) {
       const data = await res.json();
       jwtToken = data.token;
-
       const payload = JSON.parse(atob(jwtToken.split('.')[1]));
       const role = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 'User';
-
       document.getElementById('tbUsername').textContent = username;
       document.getElementById('tbRole').textContent     = role;
-
       document.getElementById('loginPage').hidden = true;
       document.getElementById('appPage').hidden   = false;
       showPage('dashboard');
@@ -499,6 +611,7 @@ function logout() {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !document.getElementById('loginPage').hidden) login();
+  if (e.key === 'Escape') { closeCompanyModal(); closeArticleModal(); closeCompanyArticlesModal(); closeConfirm(); }
 });
 
 // ── Navigation ─────────────────────────────────────────────────────────────
@@ -507,16 +620,15 @@ function showPage(name) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
-
   if (name === 'companies') loadCompanies();
+  if (name === 'articles')  loadArticles();
 }
 
 // ── Dashboard / Weather ────────────────────────────────────────────────────
 async function fetchWeather() {
-  const errorEl  = document.getElementById('dashError');
+  const errorEl   = document.getElementById('dashError');
   const resultsEl = document.getElementById('weatherResults');
   errorEl.textContent = '';
-
   const res = await apiFetch('/api/weatherforecast');
   if (res.ok) {
     const data = await res.json();
@@ -527,7 +639,9 @@ async function fetchWeather() {
   }
 }
 
-// ── Companies CRUD ─────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════
+// COMPANIES
+// ══════════════════════════════════════════════════════════════════════════
 async function loadCompanies() {
   const tbody = document.getElementById('companiesBody');
   tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Loading…</td></tr>';
@@ -548,27 +662,30 @@ async function loadCompanies() {
       <td>${esc(c.address)}</td>
       <td>
         <div class="td-actions">
-          <button class="btn btn-ghost" style="padding:.3rem .7rem;font-size:.8rem" onclick="editCompany('${c.id}','${esc(c.name)}','${escAttr(c.description)}','${escAttr(c.address)}')">Edit</button>
-          <button class="btn btn-danger" style="padding:.3rem .7rem;font-size:.8rem" onclick="askDelete('${c.id}','${esc(c.name)}')">Delete</button>
+          <button class="btn btn-ghost btn-sm" onclick="editCompany('${c.id}','${escAttr(c.name)}','${escAttr(c.description)}','${escAttr(c.address)}')">Edit</button>
+          <button class="btn btn-primary btn-sm" onclick="openCompanyArticles('${c.id}','${escAttr(c.name)}')">
+            Articles<span class="count-chip">${(c.articleIds||[]).length}</span>
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="askDelete('company','${c.id}','${escAttr(c.name)}')">Delete</button>
         </div>
       </td>
     </tr>`).join('');
 }
 
 function openCompanyModal(id, name, description, address) {
-  editingId = id || null;
-  document.getElementById('modalTitle').textContent   = editingId ? 'Edit Company' : 'Add Company';
+  editingCompanyId = id || null;
+  document.getElementById('companyModalTitle').textContent  = editingCompanyId ? 'Edit Company' : 'Add Company';
   document.getElementById('cName').value              = name        || '';
   document.getElementById('cDescription').value       = description || '';
   document.getElementById('cAddress').value           = address     || '';
-  document.getElementById('modalError').textContent   = '';
+  document.getElementById('companyModalError').textContent = '';
   document.getElementById('companyModal').hidden      = false;
   document.getElementById('cName').focus();
 }
 
 function closeCompanyModal() {
   document.getElementById('companyModal').hidden = true;
-  editingId = null;
+  editingCompanyId = null;
 }
 
 function editCompany(id, name, description, address) {
@@ -579,31 +696,27 @@ async function saveCompany() {
   const name        = document.getElementById('cName').value.trim();
   const description = document.getElementById('cDescription').value.trim();
   const address     = document.getElementById('cAddress').value.trim();
-  const errorEl     = document.getElementById('modalError');
+  const errorEl     = document.getElementById('companyModalError');
   const btn         = document.getElementById('saveCompanyBtn');
 
   errorEl.textContent = '';
   if (!name) { errorEl.textContent = 'Name is required.'; return; }
 
   btn.disabled = true; btn.textContent = 'Saving…';
-
-  const url    = editingId ? `/api/companies/${editingId}` : '/api/companies';
-  const method = editingId ? 'PUT' : 'POST';
-
   try {
-    const res = await apiFetch(url, {
+    const url    = editingCompanyId ? `/api/companies/${editingCompanyId}` : '/api/companies';
+    const method = editingCompanyId ? 'PUT' : 'POST';
+    const res    = await apiFetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, description, address })
     });
-
     if (res.ok) {
       closeCompanyModal();
       await loadCompanies();
-      showToast(editingId ? 'Company updated.' : 'Company created.', 'success');
+      showToast(editingCompanyId ? 'Company updated.' : 'Company created.', 'success');
     } else {
-      const msg = await res.text();
-      errorEl.textContent = msg || 'Save failed.';
+      errorEl.textContent = (await res.text()) || 'Save failed.';
     }
   } catch (e) {
     errorEl.textContent = 'Network error: ' + e.message;
@@ -612,24 +725,198 @@ async function saveCompany() {
   }
 }
 
-function askDelete(id, name) {
-  pendingDeleteId = id;
-  document.getElementById('confirmMsg').textContent = `Delete "${name}"? This cannot be undone.`;
+// ══════════════════════════════════════════════════════════════════════════
+// ARTICLES
+// ══════════════════════════════════════════════════════════════════════════
+async function loadArticles() {
+  const tbody = document.getElementById('articlesBody');
+  tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Loading…</td></tr>';
+
+  const res = await apiFetch('/api/articles');
+  if (!res.ok) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Failed to load.</td></tr>'; return; }
+
+  allArticles = await res.json();
+
+  if (allArticles.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No articles yet. Click "+ Add Article" to create one.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = allArticles.map(a => `
+    <tr>
+      <td><strong>${esc(a.code)}</strong></td>
+      <td style="color:#718096">${esc(a.description)}</td>
+      <td>${esc(a.productCode)}</td>
+      <td>
+        <div class="td-actions">
+          <button class="btn btn-ghost btn-sm" onclick="editArticle('${a.id}','${escAttr(a.code)}','${escAttr(a.description)}','${escAttr(a.productCode)}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="askDelete('article','${a.id}','${escAttr(a.code)}')">Delete</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function openArticleModal(id, code, description, productCode) {
+  editingArticleId = id || null;
+  document.getElementById('articleModalTitle').textContent    = editingArticleId ? 'Edit Article' : 'Add Article';
+  document.getElementById('aCode').value              = code        || '';
+  document.getElementById('aDescription').value       = description || '';
+  document.getElementById('aProductCode').value       = productCode || '';
+  document.getElementById('articleModalError').textContent = '';
+  document.getElementById('articleModal').hidden      = false;
+  document.getElementById('aCode').focus();
+}
+
+function closeArticleModal() {
+  document.getElementById('articleModal').hidden = true;
+  editingArticleId = null;
+}
+
+function editArticle(id, code, description, productCode) {
+  openArticleModal(id, code, description, productCode);
+}
+
+async function saveArticle() {
+  const code        = document.getElementById('aCode').value.trim();
+  const description = document.getElementById('aDescription').value.trim();
+  const productCode = document.getElementById('aProductCode').value.trim();
+  const errorEl     = document.getElementById('articleModalError');
+  const btn         = document.getElementById('saveArticleBtn');
+
+  errorEl.textContent = '';
+  if (!code) { errorEl.textContent = 'Code is required.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const url    = editingArticleId ? `/api/articles/${editingArticleId}` : '/api/articles';
+    const method = editingArticleId ? 'PUT' : 'POST';
+    const res    = await apiFetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, description, productCode })
+    });
+    if (res.ok) {
+      closeArticleModal();
+      await loadArticles();
+      showToast(editingArticleId ? 'Article updated.' : 'Article created.', 'success');
+    } else {
+      errorEl.textContent = (await res.text()) || 'Save failed.';
+    }
+  } catch (e) {
+    errorEl.textContent = 'Network error: ' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// COMPANY ↔ ARTICLES
+// ══════════════════════════════════════════════════════════════════════════
+async function openCompanyArticles(companyId, companyName) {
+  caCompanyId   = companyId;
+  caCompanyName = companyName;
+  document.getElementById('caModalTitle').textContent  = `Articles — ${companyName}`;
+  document.getElementById('caAddError').textContent    = '';
+  document.getElementById('companyArticlesModal').hidden = false;
+  await refreshCompanyArticlesModal();
+}
+
+function closeCompanyArticlesModal() {
+  document.getElementById('companyArticlesModal').hidden = true;
+  caCompanyId = null;
+  // Refresh companies list to update article counts
+  if (document.getElementById('page-companies').classList.contains('active')) loadCompanies();
+}
+
+async function refreshCompanyArticlesModal() {
+  // Load fresh article list for the dropdown
+  const allRes = await apiFetch('/api/articles');
+  allArticles = allRes.ok ? await allRes.json() : [];
+
+  // Load linked articles
+  const linkedRes = await apiFetch(`/api/companies/${caCompanyId}/articles`);
+  const linked    = linkedRes.ok ? await linkedRes.json() : [];
+  const linkedIds = new Set(linked.map(a => a.id));
+
+  // Populate "add" dropdown with unlinked articles only
+  const select = document.getElementById('caArticleSelect');
+  const unlinked = allArticles.filter(a => !linkedIds.has(a.id));
+  select.innerHTML = '<option value="">— select an article —</option>' +
+    unlinked.map(a => `<option value="${a.id}">${esc(a.code)} — ${esc(a.description)}</option>`).join('');
+
+  // Render linked list
+  const list = document.getElementById('caLinkedList');
+  if (linked.length === 0) {
+    list.innerHTML = '<div class="ca-empty">No articles linked yet.</div>';
+    return;
+  }
+
+  list.innerHTML = linked.map(a => `
+    <div class="ca-linked-item">
+      <div class="ca-item-info">
+        <strong>${esc(a.code)}</strong>
+        <span>${esc(a.description)}${a.productCode ? ' &nbsp;·&nbsp; ' + esc(a.productCode) : ''}</span>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeArticleFromCompany('${a.id}')">Remove</button>
+    </div>`).join('');
+}
+
+async function addArticleToCompany() {
+  const select  = document.getElementById('caArticleSelect');
+  const errorEl = document.getElementById('caAddError');
+  errorEl.textContent = '';
+
+  const articleId = select.value;
+  if (!articleId) { errorEl.textContent = 'Select an article first.'; return; }
+
+  const res = await apiFetch(`/api/companies/${caCompanyId}/articles/${articleId}`, { method: 'POST' });
+  if (res.ok) {
+    await refreshCompanyArticlesModal();
+    showToast('Article linked.', 'success');
+  } else {
+    errorEl.textContent = (await res.text()) || 'Failed to add article.';
+  }
+}
+
+async function removeArticleFromCompany(articleId) {
+  const res = await apiFetch(`/api/companies/${caCompanyId}/articles/${articleId}`, { method: 'DELETE' });
+  if (res.ok) {
+    await refreshCompanyArticlesModal();
+    showToast('Article removed.', 'success');
+  } else {
+    showToast('Failed to remove article.', 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// DELETE CONFIRM
+// ══════════════════════════════════════════════════════════════════════════
+function askDelete(type, id, name) {
+  pendingDeleteType = type;
+  pendingDeleteId   = id;
+  document.getElementById('confirmTitle').textContent = type === 'company' ? 'Delete Company' : 'Delete Article';
+  document.getElementById('confirmMsg').textContent   = `Delete "${name}"? This cannot be undone.`;
   document.getElementById('confirmModal').hidden = false;
 }
 
 function closeConfirm() {
   document.getElementById('confirmModal').hidden = true;
-  pendingDeleteId = null;
+  pendingDeleteId = pendingDeleteType = null;
 }
 
 async function confirmDelete() {
   if (!pendingDeleteId) return;
-  const res = await apiFetch(`/api/companies/${pendingDeleteId}`, { method: 'DELETE' });
+  const url = pendingDeleteType === 'company'
+    ? `/api/companies/${pendingDeleteId}`
+    : `/api/articles/${pendingDeleteId}`;
+
+  const res = await apiFetch(url, { method: 'DELETE' });
   closeConfirm();
+
   if (res.ok) {
-    await loadCompanies();
-    showToast('Company deleted.', 'success');
+    if (pendingDeleteType === 'company' || document.getElementById('page-companies').classList.contains('active')) loadCompanies();
+    if (pendingDeleteType === 'article'  || document.getElementById('page-articles').classList.contains('active'))  loadArticles();
+    showToast('Deleted successfully.', 'success');
   } else {
     showToast('Delete failed.', 'error');
   }
@@ -648,7 +935,7 @@ function esc(str) {
 }
 
 function escAttr(str) {
-  return (str || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+  return (str || '').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
 }
 
 function showToast(msg, type = '') {
@@ -659,16 +946,15 @@ function showToast(msg, type = '') {
 }
 
 // Close modals on overlay click
-document.getElementById('companyModal').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeCompanyModal();
-});
-document.getElementById('confirmModal').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeConfirm();
-});
-
-// Close modals on Escape
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeCompanyModal(); closeConfirm(); }
+['companyModal','articleModal','companyArticlesModal','confirmModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target === e.currentTarget) {
+      if (id === 'companyModal')         closeCompanyModal();
+      if (id === 'articleModal')         closeArticleModal();
+      if (id === 'companyArticlesModal') closeCompanyArticlesModal();
+      if (id === 'confirmModal')         closeConfirm();
+    }
+  });
 });
 </script>
 </body>

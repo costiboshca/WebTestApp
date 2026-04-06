@@ -11,8 +11,13 @@ namespace WebTestApp.Controllers;
 public class CompaniesController : ControllerBase
 {
     private readonly ICompanyService _companies;
+    private readonly IArticleService _articles;
 
-    public CompaniesController(ICompanyService companies) => _companies = companies;
+    public CompaniesController(ICompanyService companies, IArticleService articles)
+    {
+        _companies = companies;
+        _articles  = articles;
+    }
 
     [HttpGet]
     public IActionResult GetAll() => Ok(_companies.GetAll());
@@ -56,4 +61,46 @@ public class CompaniesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult Delete(Guid id) =>
         _companies.Delete(id) ? NoContent() : NotFound();
+
+    // ── Company → Articles sub-resource ──────────────────────────────────────
+
+    [HttpGet("{id:guid}/articles")]
+    [ProducesResponseType(typeof(IEnumerable<Article>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult GetArticles(Guid id)
+    {
+        var ids = _companies.GetArticleIds(id);
+        if (ids is null) return NotFound();
+
+        var articles = ids
+            .Select(aid => _articles.GetById(aid))
+            .Where(a => a is not null)
+            .ToList();
+
+        return Ok(articles);
+    }
+
+    [HttpPost("{id:guid}/articles/{articleId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult AddArticle(Guid id, Guid articleId)
+    {
+        if (_articles.GetById(articleId) is null)
+            return NotFound("Article not found.");
+
+        if (!_companies.AddArticle(id, articleId))
+            return NotFound("Company not found.");
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id:guid}/articles/{articleId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult RemoveArticle(Guid id, Guid articleId)
+    {
+        if (_companies.GetById(id) is null) return NotFound("Company not found.");
+        if (!_companies.RemoveArticle(id, articleId)) return NotFound("Article not linked.");
+        return NoContent();
+    }
 }

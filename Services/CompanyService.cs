@@ -37,4 +37,21 @@ public class CompanyService : ICompanyService
     }
 
     public bool Delete(Guid id) => _store.TryRemove(id, out _);
+
+    private readonly object _articleLock = new();
+
+    public bool AddArticle(Guid companyId, Guid articleId)
+    {
+        if (!_store.TryGetValue(companyId, out var company)) return false;
+        lock (_articleLock) { return company.ArticleIds.Add(articleId); }
+    }
+
+    public bool RemoveArticle(Guid companyId, Guid articleId)
+    {
+        if (!_store.TryGetValue(companyId, out var company)) return false;
+        lock (_articleLock) { return company.ArticleIds.Remove(articleId); }
+    }
+
+    public IReadOnlySet<Guid>? GetArticleIds(Guid companyId) =>
+        _store.TryGetValue(companyId, out var company) ? company.ArticleIds : null;
 }
