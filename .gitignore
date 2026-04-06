@@ -1,0 +1,16 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.log
+
+## NuGet
+packages/
+*.nupkg
+.nuget/
+
+## Secrets — never commit these
+appsettings.Production.json
+secrets.json

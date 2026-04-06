@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebTestApp</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+
+    /* ── Login ─────────────────────────────────────────── */
+    #loginPage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .login-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.12);
+      padding: 2rem;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .login-card h1 { font-size: 1.5rem; margin-bottom: 1.5rem; color: #1a1a2e; }
+
+    label { display: block; font-size: .875rem; color: #555; margin-bottom: .25rem; }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      padding: .6rem .75rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: .9375rem;
+      margin-bottom: 1rem;
+      transition: border-color .2s;
+      font-family: inherit;
+    }
+
+    input:focus, textarea:focus { outline: none; border-color: #4361ee; }
+
+    textarea { resize: vertical; min-height: 70px; }
+
+    .btn {
+      padding: .55rem 1.1rem;
+      border: none;
+      border-radius: 4px;
+      font-size: .9375rem;
+      cursor: pointer;
+      transition: background .2s, opacity .2s;
+    }
+
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-primary  { background: #4361ee; color: #fff; }
+    .btn-primary:hover:not(:disabled)  { background: #3451d1; }
+    .btn-success  { background: #06d6a0; color: #fff; }
+    .btn-success:hover:not(:disabled)  { background: #05b888; }
+    .btn-danger   { background: #e63946; color: #fff; }
+    .btn-danger:hover:not(:disabled)   { background: #c1121f; }
+    .btn-ghost    { background: transparent; color: #4361ee; border: 1px solid #4361ee; }
+    .btn-ghost:hover:not(:disabled)    { background: #eef0fd; }
+    .btn-full     { width: 100%; }
+
+    .error { color: #e63946; font-size: .8125rem; margin-top: -.5rem; margin-bottom: .75rem; }
+
+    /* ── App shell ─────────────────────────────────────── */
+    #appPage { display: flex; min-height: 100vh; }
+
+    /* ── Top bar ───────────────────────────────────────── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      background: #1a1a2e;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 1.25rem;
+      z-index: 100;
+      gap: 1rem;
+    }
+
+    .topbar-title { font-size: 1.125rem; font-weight: 600; flex: 1; }
+
+    .topbar-user {
+      font-size: .875rem;
+      color: #a0aec0;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .badge {
+      background: #4361ee;
+      color: #fff;
+      font-size: .7rem;
+      padding: .1rem .45rem;
+      border-radius: 99px;
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid #4a5568;
+      color: #a0aec0;
+      border-radius: 4px;
+      padding: .3rem .75rem;
+      font-size: .8125rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-logout:hover { border-color: #e63946; color: #e63946; }
+
+    /* ── Right sidebar ─────────────────────────────────── */
+    .sidebar {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 200px;
+      height: calc(100vh - 56px);
+      background: #fff;
+      border-left: 1px solid #e2e8f0;
+      padding: 1rem 0;
+      overflow-y: auto;
+      z-index: 90;
+    }
+
+    .sidebar-section {
+      padding: .25rem 1rem .5rem;
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #a0aec0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .6rem 1.25rem;
+      font-size: .9rem;
+      color: #4a5568;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      border-right: 3px solid transparent;
+      user-select: none;
+    }
+
+    .nav-item:hover { background: #f7f8ff; color: #4361ee; }
+
+    .nav-item.active {
+      background: #eef0fd;
+      color: #4361ee;
+      border-right-color: #4361ee;
+      font-weight: 600;
+    }
+
+    .nav-icon { font-size: 1rem; width: 1.2rem; text-align: center; }
+
+    /* ── Main content ──────────────────────────────────── */
+    .main {
+      margin-top: 56px;
+      margin-right: 200px;
+      padding: 2rem;
+      flex: 1;
+      min-height: calc(100vh - 56px);
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Page header ───────────────────────────────────── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .page-title { font-size: 1.375rem; font-weight: 700; color: #1a1a2e; }
+
+    /* ── Table ─────────────────────────────────────────── */
+    .table-wrap {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.07);
+      overflow: hidden;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead { background: #f7f8ff; }
+
+    th {
+      text-align: left;
+      padding: .85rem 1rem;
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #718096;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    td {
+      padding: .875rem 1rem;
+      font-size: .9rem;
+      color: #2d3748;
+      border-bottom: 1px solid #f0f2f5;
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafbff; }
+
+    .td-actions { display: flex; gap: .5rem; }
+
+    .empty-row td {
+      text-align: center;
+      color: #a0aec0;
+      padding: 2.5rem;
+      font-size: .9375rem;
+    }
+
+    /* ── Modal ─────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.18);
+      padding: 1.75rem;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    .modal-title { font-size: 1.125rem; font-weight: 700; color: #1a1a2e; }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      color: #718096;
+      line-height: 1;
+      padding: .2rem .4rem;
+      border-radius: 4px;
+    }
+
+    .modal-close:hover { background: #f0f2f5; color: #e63946; }
+
+    .modal-footer {
+      display: flex;
+      gap: .75rem;
+      justify-content: flex-end;
+      margin-top: 1rem;
+    }
+
+    /* ── Confirm dialog ────────────────────────────────── */
+    .confirm-msg { margin-bottom: 1.25rem; color: #4a5568; }
+
+    /* ── Toast ─────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1a1a2e;
+      color: #fff;
+      padding: .65rem 1.25rem;
+      border-radius: 6px;
+      font-size: .875rem;
+      opacity: 0;
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+      z-index: 300;
+    }
+
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.success { background: #06d6a0; }
+    #toast.error   { background: #e63946; }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════ LOGIN PAGE ════════════════════ -->
+<div id="loginPage">
+  <div class="login-card">
+    <h1>Sign In</h1>
+    <label for="username">Username</label>
+    <input type="text" id="username" placeholder="admin or user" autocomplete="username" />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="password" autocomplete="current-password" />
+
+    <button class="btn btn-primary btn-full" id="loginBtn" onclick="login()">Login</button>
+    <div id="loginError" class="error" style="margin-top:.5rem"></div>
+  </div>
+</div>
+
+<!-- ════════════════════ APP PAGE ════════════════════ -->
+<div id="appPage" hidden>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-title">WebTestApp</div>
+    <div class="topbar-user">
+      <span id="tbUsername"></span>
+      <span id="tbRole" class="badge"></span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- Right sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-section">Navigation</div>
+    <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
+      <span class="nav-icon">&#9632;</span> Dashboard
+    </div>
+    <div class="sidebar-section" style="margin-top:.5rem">Management</div>
+    <div class="nav-item" onclick="showPage('companies')" id="nav-companies">
+      <span class="nav-icon">&#127970;</span> Companies
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <div class="main">
+
+    <!-- Dashboard page -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-title">Dashboard</div>
+      </div>
+      <div class="table-wrap" style="padding:1.5rem;max-width:520px">
+        <p style="color:#4a5568;margin-bottom:1rem">Welcome! Use the menu on the right to navigate.</p>
+        <button class="btn btn-primary" onclick="fetchWeather()">Fetch Weather Forecast</button>
+        <div id="dashError" class="error" style="margin-top:.75rem"></div>
+        <pre id="weatherResults" style="margin-top:1rem;background:#1a1a2e;color:#e0e0e0;border-radius:4px;padding:1rem;font-size:.8rem;display:none"></pre>
+      </div>
+    </div>
+
+    <!-- Companies page -->
+    <div class="page" id="page-companies">
+      <div class="page-header">
+        <div class="page-title">Companies</div>
+        <button class="btn btn-success" onclick="openCompanyModal()">+ Add Company</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Address</th>
+              <th style="width:130px">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="companiesBody">
+            <tr class="empty-row"><td colspan="4">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /appPage -->
+
+<!-- ════════════════════ COMPANY MODAL ════════════════════ -->
+<div class="modal-overlay" id="companyModal" hidden>
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Add Company</div>
+      <button class="modal-close" onclick="closeCompanyModal()">&#10005;</button>
+    </div>
+
+    <label for="cName">Name <span style="color:#e63946">*</span></label>
+    <input type="text" id="cName" placeholder="Company name" />
+
+    <label for="cDescription">Description</label>
+    <textarea id="cDescription" placeholder="Short description"></textarea>
+
+    <label for="cAddress">Address</label>
+    <input type="text" id="cAddress" placeholder="Street, City, Country" />
+
+    <div id="modalError" class="error"></div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCompanyModal()">Cancel</button>
+      <button class="btn btn-primary" id="saveCompanyBtn" onclick="saveCompany()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ CONFIRM MODAL ════════════════════ -->
+<div class="modal-overlay" id="confirmModal" hidden>
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <div class="modal-title">Delete Company</div>
+      <button class="modal-close" onclick="closeConfirm()">&#10005;</button>
+    </div>
+    <p class="confirm-msg" id="confirmMsg"></p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ TOAST ════════════════════ -->
+<div id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let jwtToken        = null;
+let editingId       = null;   // null = new company, guid = editing
+let pendingDeleteId = null;
+
+// ── Auth ───────────────────────────────────────────────────────────────────
+async function login() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const errorEl  = document.getElementById('loginError');
+  const btn      = document.getElementById('loginBtn');
+
+  errorEl.textContent = '';
+  if (!username || !password) { errorEl.textContent = 'Enter username and password.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Signing in…';
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      jwtToken = data.token;
+
+      const payload = JSON.parse(atob(jwtToken.split('.')[1]));
+      const role = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 'User';
+
+      document.getElementById('tbUsername').textContent = username;
+      document.getElementById('tbRole').textContent     = role;
+
+      document.getElementById('loginPage').hidden = true;
+      document.getElementById('appPage').hidden   = false;
+      showPage('dashboard');
+    } else {
+      errorEl.textContent = 'Invalid username or password.';
+    }
+  } catch (e) {
+    errorEl.textContent = 'Network error: ' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Login';
+  }
+}
+
+function logout() {
+  jwtToken = null;
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
+  document.getElementById('loginError').textContent = '';
+  document.getElementById('appPage').hidden   = true;
+  document.getElementById('loginPage').hidden = false;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !document.getElementById('loginPage').hidden) login();
+});
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+
+  if (name === 'companies') loadCompanies();
+}
+
+// ── Dashboard / Weather ────────────────────────────────────────────────────
+async function fetchWeather() {
+  const errorEl  = document.getElementById('dashError');
+  const resultsEl = document.getElementById('weatherResults');
+  errorEl.textContent = '';
+
+  const res = await apiFetch('/api/weatherforecast');
+  if (res.ok) {
+    const data = await res.json();
+    resultsEl.textContent = JSON.stringify(data, null, 2);
+    resultsEl.style.display = 'block';
+  } else {
+    errorEl.textContent = 'Error ' + res.status;
+  }
+}
+
+// ── Companies CRUD ─────────────────────────────────────────────────────────
+async function loadCompanies() {
+  const tbody = document.getElementById('companiesBody');
+  tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Loading…</td></tr>';
+
+  const res = await apiFetch('/api/companies');
+  if (!res.ok) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Failed to load.</td></tr>'; return; }
+
+  const companies = await res.json();
+  if (companies.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No companies yet. Click "+ Add Company" to create one.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = companies.map(c => `
+    <tr>
+      <td><strong>${esc(c.name)}</strong></td>
+      <td style="color:#718096">${esc(c.description)}</td>
+      <td>${esc(c.address)}</td>
+      <td>
+        <div class="td-actions">
+          <button class="btn btn-ghost" style="padding:.3rem .7rem;font-size:.8rem" onclick="editCompany('${c.id}','${esc(c.name)}','${escAttr(c.description)}','${escAttr(c.address)}')">Edit</button>
+          <button class="btn btn-danger" style="padding:.3rem .7rem;font-size:.8rem" onclick="askDelete('${c.id}','${esc(c.name)}')">Delete</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function openCompanyModal(id, name, description, address) {
+  editingId = id || null;
+  document.getElementById('modalTitle').textContent   = editingId ? 'Edit Company' : 'Add Company';
+  document.getElementById('cName').value              = name        || '';
+  document.getElementById('cDescription').value       = description || '';
+  document.getElementById('cAddress').value           = address     || '';
+  document.getElementById('modalError').textContent   = '';
+  document.getElementById('companyModal').hidden      = false;
+  document.getElementById('cName').focus();
+}
+
+function closeCompanyModal() {
+  document.getElementById('companyModal').hidden = true;
+  editingId = null;
+}
+
+function editCompany(id, name, description, address) {
+  openCompanyModal(id, name, description, address);
+}
+
+async function saveCompany() {
+  const name        = document.getElementById('cName').value.trim();
+  const description = document.getElementById('cDescription').value.trim();
+  const address     = document.getElementById('cAddress').value.trim();
+  const errorEl     = document.getElementById('modalError');
+  const btn         = document.getElementById('saveCompanyBtn');
+
+  errorEl.textContent = '';
+  if (!name) { errorEl.textContent = 'Name is required.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  const url    = editingId ? `/api/companies/${editingId}` : '/api/companies';
+  const method = editingId ? 'PUT' : 'POST';
+
+  try {
+    const res = await apiFetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, description, address })
+    });
+
+    if (res.ok) {
+      closeCompanyModal();
+      await loadCompanies();
+      showToast(editingId ? 'Company updated.' : 'Company created.', 'success');
+    } else {
+      const msg = await res.text();
+      errorEl.textContent = msg || 'Save failed.';
+    }
+  } catch (e) {
+    errorEl.textContent = 'Network error: ' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save';
+  }
+}
+
+function askDelete(id, name) {
+  pendingDeleteId = id;
+  document.getElementById('confirmMsg').textContent = `Delete "${name}"? This cannot be undone.`;
+  document.getElementById('confirmModal').hidden = false;
+}
+
+function closeConfirm() {
+  document.getElementById('confirmModal').hidden = true;
+  pendingDeleteId = null;
+}
+
+async function confirmDelete() {
+  if (!pendingDeleteId) return;
+  const res = await apiFetch(`/api/companies/${pendingDeleteId}`, { method: 'DELETE' });
+  closeConfirm();
+  if (res.ok) {
+    await loadCompanies();
+    showToast('Company deleted.', 'success');
+  } else {
+    showToast('Delete failed.', 'error');
+  }
+}
+
+// ── Utilities ──────────────────────────────────────────────────────────────
+function apiFetch(url, options = {}) {
+  return fetch(url, {
+    ...options,
+    headers: { 'Authorization': 'Bearer ' + jwtToken, ...(options.headers || {}) }
+  });
+}
+
+function esc(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function escAttr(str) {
+  return (str || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+}
+
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (type ? ' ' + type : '');
+  setTimeout(() => { el.className = ''; }, 3000);
+}
+
+// Close modals on overlay click
+document.getElementById('companyModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeCompanyModal();
+});
+document.getElementById('confirmModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeConfirm();
+});
+
+// Close modals on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeCompanyModal(); closeConfirm(); }
+});
+</script>
+</body>
+</html>
