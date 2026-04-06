@@ -1,7 +1,7 @@
 # WebTestApp — Project History & Context
 
 ## Overview
-ASP.NET Core Web API (.NET 8) with JWT authentication and a single-page HTML frontend served as static files. No database — data is stored in memory for the lifetime of the process.
+ASP.NET Core Web API (.NET 8) with JWT authentication and a single-page HTML frontend served as static files. Data persisted in PostgreSQL via EF Core.
 
 ## Tech Stack
 - **Runtime:** .NET 8 (SDK 10 installed on machine)
@@ -26,15 +26,15 @@ Then open `http://localhost:5000`. Migrations are applied automatically on start
 - **Connection string:** stored in `appsettings.Development.json` (git-ignored)
 - `appsettings.json` contains a placeholder password (`CHANGE_ME`) — safe to commit
 - Run migrations manually: `dotnet ef migrations add <Name>` then `dotnet ef database update`
-- Tables: `Companies`, `Articles`, `CompanyArticle` (many-to-many join)
+- Tables: `Companies`, `Articles`, `CompanyArticle` (many-to-many join), `Users`
 
 ## Demo Credentials
-| Username | Password  | Role  |
-|----------|-----------|-------|
-| admin    | password123 | Admin |
-| user     | letmein   | User  |
+| Username | Password | Role  |
+|----------|----------|-------|
+| admin    | pwd123   | Admin |
+| user     | letmein  | User  |
 
-Credentials are hard-coded in `Services/AuthService.cs`. Replace with hashed passwords and a real user store before any production use.
+Credentials are stored in the `Users` PostgreSQL table with hashed passwords (`PasswordHasher<User>` from ASP.NET Core Identity). Seeded automatically on first startup in `Program.cs`.
 
 ## Project Structure
 ```
@@ -51,19 +51,20 @@ WebTestApp/
 │   ├── CompaniesController.cs         ← CRUD /api/companies + article sub-resources (protected, async)
 │   └── WeatherForecastController.cs   ← GET /api/weatherforecast (protected)
 ├── Data/
-│   └── AppDbContext.cs                ← EF Core DbContext (Companies, Articles, CompanyArticle)
+│   └── AppDbContext.cs                ← EF Core DbContext (Companies, Articles, CompanyArticle, Users)
 ├── Migrations/                        ← EF Core generated migrations
 ├── Models/
 │   ├── Article.cs                     ← Article entity + ArticleRequest DTO
 │   ├── Company.cs                     ← Company entity + CompanyRequest + CompanyResponse DTOs
 │   ├── LoginRequest.cs
 │   ├── LoginResponse.cs
+│   ├── User.cs                        ← User entity (Id, Username, PasswordHash, Role)
 │   └── WeatherForecast.cs
 ├── Services/
 │   ├── IArticleService.cs
 │   ├── ArticleService.cs              ← EF Core async, Scoped
-│   ├── IAuthService.cs
-│   ├── AuthService.cs                 ← validates credentials, mints JWT (Scoped)
+│   ├── IAuthService.cs                ← AuthenticateAsync
+│   ├── AuthService.cs                 ← queries DB, verifies with PasswordHasher, mints JWT
 │   ├── ICompanyService.cs
 │   └── CompanyService.cs              ← EF Core async, Scoped
 └── wwwroot/
@@ -92,10 +93,13 @@ WebTestApp/
 Swagger UI is available at `/swagger` in Development.
 
 ## Company Model
-Fields: `Id` (Guid, auto-generated), `Name` (required), `Description`, `Address`, `ArticleIds` (HashSet&lt;Guid&gt;).
+Fields: `Id` (Guid, auto-generated), `Name` (required), `Description`, `Address`, `Articles` (navigation collection).
 
 ## Article Model
-Fields: `Id` (Guid, auto-generated), `Code` (required), `Description`, `ProductCode`.
+Fields: `Id` (Guid, auto-generated), `Code` (required, unique), `Description`, `ProductCode`.
+
+## User Model
+Fields: `Id` (Guid, auto-generated), `Username` (required, unique), `PasswordHash`, `Role`.
 
 ## Frontend (wwwroot/index.html)
 Single self-contained HTML file — no build step, no npm, no framework.
@@ -134,6 +138,18 @@ Single self-contained HTML file — no build step, no npm, no framework.
   - Git identity for this repo: Constantin Bosca &lt;costiboshca@yahoo.com&gt;
   - `gh` CLI not available; repo created via GitHub REST API, pushed over HTTPS
   - Token removed from remote URL after push (stored clean as `https://github.com/costiboshca/WebTestApp.git`)
+
+### Session 6
+- Moved users from hard-coded dictionary to **PostgreSQL `Users` table**
+  - Added `Models/User.cs` — `User` entity (Id, Username, PasswordHash, Role)
+  - `AppDbContext` extended with `DbSet<User>` and unique index on `Username`
+  - `AuthService` now queries DB and verifies passwords with `PasswordHasher<User>` (ASP.NET Core Identity, no extra package)
+  - `IAuthService.Authenticate` renamed to `AuthenticateAsync` — fully async
+  - `AuthController` updated to async
+  - `Program.cs` seeds `admin/pwd123` (Admin) and `user/letmein` (User) on first startup
+  - Migration `AddUsers` applied — `Users` table created in PostgreSQL
+  - Admin password changed from `password123` → `pwd123` (user edit)
+- Added `Properties/launchSettings.json` to set `ASPNETCORE_ENVIRONMENT=Development` so `appsettings.Development.json` (real DB password) is loaded on `dotnet run`
 
 ### Session 5
 - Migrated data storage from in-memory to **PostgreSQL** via Entity Framework Core
