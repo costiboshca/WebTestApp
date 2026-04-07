@@ -10,6 +10,7 @@ ASP.NET Core Web API (.NET 8) with JWT authentication and a single-page HTML fro
 - **Frontend:** Vanilla HTML + CSS + JavaScript (no framework, no build step)
 - **Database:** PostgreSQL via Entity Framework Core 8 + Npgsql provider
 - **ORM:** EF Core with code-first migrations (migrations auto-applied on startup)
+- **AI:** Anthropic C# SDK (`Anthropic` NuGet) — `claude-opus-4-6` with adaptive thinking + tool use
 
 ## Running the App
 ```bash
@@ -48,6 +49,7 @@ WebTestApp/
 ├── Controllers/
 │   ├── AuthController.cs              ← POST /api/auth/login (public)
 │   ├── ArticlesController.cs          ← CRUD /api/articles (protected, async)
+│   ├── ChatController.cs              ← POST /api/chat (protected) — AI agent endpoint
 │   ├── CompaniesController.cs         ← CRUD /api/companies + article sub-resources (protected, async)
 │   └── WeatherForecastController.cs   ← GET /api/weatherforecast (protected)
 ├── Data/
@@ -55,6 +57,7 @@ WebTestApp/
 ├── Migrations/                        ← EF Core generated migrations
 ├── Models/
 │   ├── Article.cs                     ← Article entity + ArticleRequest DTO
+│   ├── ChatModels.cs                  ← ChatMessage, ChatRequest, ChatResponse DTOs
 │   ├── Company.cs                     ← Company entity + CompanyRequest + CompanyResponse DTOs
 │   ├── LoginRequest.cs
 │   ├── LoginResponse.cs
@@ -65,10 +68,12 @@ WebTestApp/
 │   ├── ArticleService.cs              ← EF Core async, Scoped
 │   ├── IAuthService.cs                ← AuthenticateAsync
 │   ├── AuthService.cs                 ← queries DB, verifies with PasswordHasher, mints JWT
+│   ├── IChatService.cs                ← ChatAsync
+│   ├── ChatService.cs                 ← Anthropic SDK, agentic tool-use loop, Scoped
 │   ├── ICompanyService.cs
 │   └── CompanyService.cs              ← EF Core async, Scoped
 └── wwwroot/
-    └── index.html                     ← SPA: login, sidebar nav, companies + articles CRUD
+    └── index.html                     ← SPA: login, sidebar nav, companies + articles CRUD, AI chat
 ```
 
 ## API Endpoints
@@ -89,6 +94,7 @@ WebTestApp/
 | POST | `/api/articles` | JWT | Create article |
 | PUT | `/api/articles/{id}` | JWT | Update article |
 | DELETE | `/api/articles/{id}` | JWT | Delete article |
+| POST | `/api/chat` | JWT | Send message to AI agent, returns reply |
 
 Swagger UI is available at `/swagger` in Development.
 
@@ -108,7 +114,19 @@ Single self-contained HTML file — no build step, no npm, no framework.
 - **App shell:** fixed top bar (username, role badge, logout) + right sidebar navigation
 - **Dashboard page:** fetches and displays weather data from the protected API
 - **Companies page:** table with Add / Edit / Delete, modal form, delete confirmation, toast notifications
+- **AI Chat:** floating "🤖 AI Chat" button (bottom-right), slide-up panel with message bubbles, typing indicator, conversation history maintained client-side per session
 - JWT token stored in a JS variable (lost on page refresh — intentional for simplicity)
+
+## AI Chat Agent
+- **Endpoint:** `POST /api/chat` — body `{ messages: [{role, content}] }`, response `{ reply }`
+- **Model:** `claude-opus-4-6` with adaptive thinking
+- **Tools the agent can call:**
+  - `list_companies` — all companies with article count
+  - `get_company(id)` — company details + linked articles
+  - `list_articles` — all articles
+  - `get_article(id)` — article details + linked companies
+- **Config:** `Claude:ApiKey` in `appsettings.Development.json` (git-ignored — user must supply key)
+- Conversation history is kept client-side; full history sent with each request (stateless server)
 
 ## Change History
 
@@ -163,6 +181,16 @@ Single self-contained HTML file — no build step, no npm, no framework.
   - `appsettings.json` stores a placeholder password; real credentials in `appsettings.Development.json` (git-ignored)
   - Ran `dotnet ef migrations add InitialCreate` + `dotnet ef database update` — DB and all tables created
   - `dotnet-ef` global tool installed (`dotnet tool install --global dotnet-ef`)
+
+### Session 7
+- Added **AI Chat Agent** feature
+  - `Anthropic` NuGet package (v12.11.0) — official C# SDK
+  - `Models/ChatModels.cs` — `ChatMessage`, `ChatRequest`, `ChatResponse` DTOs
+  - `Services/ChatService.cs` — `claude-opus-4-6` with adaptive thinking; agentic loop handles tool use until `end_turn`; 4 DB query tools (list/get companies & articles)
+  - `Controllers/ChatController.cs` — `POST /api/chat`, JWT-protected
+  - `appsettings.json` — added `Claude:ApiKey` placeholder (`CHANGE_ME`)
+  - `appsettings.Development.json` — slot for real API key (git-ignored)
+  - `wwwroot/index.html` — floating chat button (bottom-right), slide-up chat panel, message bubbles (user blue / assistant gray), typing indicator, auto-scroll, clear conversation, Escape to close
 
 ### Session 4
 - Added **Articles** entity (Code, Description, ProductCode) with full CRUD
